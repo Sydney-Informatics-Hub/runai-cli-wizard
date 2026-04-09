@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RunAI Workload Generator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+  <style>
+    /* Top-level section nav */
+    .section-panel        { display: none; }
+    .section-panel.active { display: block; }
+
+    /* Tab panels — pico has no native panel visibility mechanism */
+    .tab-panel        { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Nav active underline — aria-current colours the link; this adds the indicator */
+    nav ul li a[aria-current] { box-shadow: 0 2px 0 var(--pico-primary); }
+
+    /* Command output — pre lives inside a dark article; reset its own box */
+    #cmd-article pre          { margin: 0; padding: 0; background: transparent; }
+    #cmd-article .dim         { opacity: 0.35; }
+    #cmd-article .comment     { opacity: 0.55; font-style: italic; }
+
+    /* Monospace env var textarea */
+    #hf-spaces-envvars { font-family: var(--pico-font-family-monospace); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+<main>
+
+  <hgroup>
+    <h1>RunAI at Sydney</h1>
+    <p>Submit workloads to the <a href="https://gpu.sydney.edu.au" target="_blank" rel="noopener">Sydney GPU Cluster</a> using the RunAI command line interface.</p>
+  </hgroup>
+
+  <!-- Top-level section nav -->
+  <nav>
+    <ul>
+      <li><a href="#" data-section="cli-setup">CLI Setup</a></li>
+      <li><a href="#" data-section="workload-gen" aria-current="page">Workload Generator</a></li>
+    </ul>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       CLI SETUP
+  ══════════════════════════════════════════════════════════════════════ -->
+  <section id="section-cli-setup" class="section-panel">
+
+    <details>
+      <summary>1 · Install the RunAI CLI</summary>
+      <p>
+        The CLI binary is downloaded directly from your cluster portal. Log in to
+        <a href="https://gpu.sydney.edu.au" target="_blank" rel="noopener">gpu.sydney.edu.au</a>,
+        then click the <strong>Help icon</strong> (?) in the top-right corner of the page.
+      </p>
+      <div class="grid">
+        <figure>
+          <img src="CLI_1_2.png" alt="Screenshots showing: ① the Help icon in the top-right of the RunAI portal, ② the Help menu that appears">
+        </figure>
+        <figure>
+          <img src="CLI_3_4.png" alt="Screenshots showing: ③ the Install CLI section in the Help panel, ④ the copy button next to the install command">
+        </figure>
+      </div>
+      <p>
+        The Help panel includes install commands pre-filled with your cluster's URL.
+        Copy the command for your operating system and run it in your terminal.
+      </p>
+    </details>
+
+    <details>
+      <summary>2 · Log in</summary>
+      <pre><code>runai login</code></pre>
+      <p>
+        This opens a browser window. Sign in with your university SSO credentials.
+        Your session token is stored locally and refreshed automatically.
+      </p>
+    </details>
+
+    <details>
+      <summary>3 · Set your default project <small>(optional)</small></summary>
+      <p>Save yourself typing <code>-p</code> on every command:</p>
+      <pre><code>runai config project &lt;your-project-name&gt;</code></pre>
+    </details>
+
+    <details>
+      <summary>4 · Useful day-to-day commands</summary>
+      <pre><code># List your running workloads
+runai list workloads
+
+# Describe a specific workload
+runai describe workload &lt;job-name&gt;
+
+# Stream logs
+runai logs &lt;job-name&gt; -f
+
+# Open an interactive shell inside a running workload
+runai exec -it &lt;job-name&gt; -- bash
+
+# Delete a workload
+runai workspace delete &lt;job-name&gt; -p &lt;project&gt;</code></pre>
+    </details>
+
+    <hr>
+    <p><small>
+      <strong>References:</strong>
+      <a href="https://gpu.sydney.edu.au/api/v1/cli-exposer/docs/runai.md" target="_blank" rel="noopener">RunAI CLI reference (Sydney cluster)</a>
+    </small></p>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       WORKLOAD GENERATOR
+  ══════════════════════════════════════════════════════════════════════ -->
+  <section id="section-workload-gen" class="section-panel active">
+
+    <p>Fill in your project code, choose a workload type, and copy the generated command.</p>
+
+    <!-- DaSHR project (persisted to localStorage) -->
+    <label for="project-code">
+      DaSHR Project Code
+      <input type="text" id="project-code"
+             placeholder="RDS-CORE-SIH4HPC-RW"
+             autocomplete="off" spellcheck="false">
+      <small id="project-derived"></small>
+    </label>
+
+    <details>
+      <summary><small>Where do I find my project code?</small></summary>
+      <p>
+        Log in to <a href="https://dashr.sydney.edu.au" target="_blank" rel="noopener">dashr.sydney.edu.au</a>
+        and follow these steps:
+      </p>
+      <div class="grid">
+        <figure>
+          <img src="dashr_1.png"
+               alt="Step 1: the My Projects tab on the Research Data &amp; Computing Home page">
+          <figcaption><small>① Go to the <em>My Projects</em> tab</small></figcaption>
+        </figure>
+        <figure>
+          <img src="dashr_2.png"
+               alt="Step 2: click your project name in the list">
+          <figcaption><small>② Click your project name</small></figcaption>
+        </figure>
+      </div>
+      <figure>
+        <img src="dashr_3.png"
+             alt="Step 3: scroll down to Project log information — the HPC Path in Service Details is your project code"
+             style="max-width:600px">
+        <figcaption><small>③ Scroll to <em>Project log information</em> → <em>Service Details</em> → <em>HPC Path</em></small></figcaption>
+      </figure>
+    </details>
+
+    <!-- Workload nav (built by workloads.js + app.js) -->
+    <nav><ul id="tab-bar"></ul></nav>
+    <div id="panels"></div>
+
+    <!-- Generated command -->
+    <article data-theme="dark" id="cmd-article" style="position:relative">
+      <a id="copy-btn"
+         class="copy-to-clipboard"
+         tabindex="0"
+         aria-label="Copy command"
+         data-tooltip="Copy to clipboard"
+         data-placement="left"
+         href="#"
+         style="position:absolute;top:0.5rem;right:0.5rem;opacity:0.25;transition:opacity 0.2s;"
+         onmouseover="this.style.opacity='1'"
+         onmouseout="this.style.opacity='0.25'"
+         onclick="copyCmd();return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+             stroke-width="2" stroke="currentColor" fill="none"
+             stroke-linecap="round" stroke-linejoin="round" id="copy-icon">
+          <path d="M8 8m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z"></path>
+          <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+        </svg>
+      </a>
+      <pre><code id="cmd-out"><span class="comment"># Enter your DaSHR project code above.</span></code></pre>
+    </article>
+
+  </section>
+
+</main>
+
+<!-- Load order: parser (no deps) → workloads (uses parser) → app (uses both) -->
+<script src="parser.js"></script>
+<script src="workloads.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
